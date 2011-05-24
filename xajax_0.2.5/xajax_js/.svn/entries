@@ -1,0 +1,52 @@
+8
+
+dir
+1803
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo/dbdMVC/trunk/xajax_0.2.5/xajax_js
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo
+
+
+
+2008-10-09T00:03:25.208920Z
+341
+root
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+78647451-d9dc-4e60-9644-f91bfbd15ed2
+
+xajax.js
+file
+
+
+
+
+2009-05-07T22:19:03.000000Z
+1a08b8cecaa3bb2416c3a0308812f1ff
+2008-10-09T00:03:25.208920Z
+341
+root
+
+xajax_uncompressed.js
+file
+
+
+
+
+2009-05-07T22:19:03.000000Z
+a26e9bf795a9cb358e73c56d80c62d6f
+2008-10-09T00:03:25.208920Z
+341
+root
+

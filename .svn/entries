@@ -1,0 +1,83 @@
+8
+
+dir
+1803
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo/dbdMVC/trunk
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo
+
+
+
+2010-02-07T03:38:06.605642Z
+1803
+wmason
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+78647451-d9dc-4e60-9644-f91bfbd15ed2
+
+LICENSE.txt
+file
+
+
+
+
+2009-05-07T22:19:03.000000Z
+b52f2d57d10c4f7ee67a7eb9615d5d24
+2007-09-24T06:55:40.409801Z
+238
+root
+
+plugins
+dir
+
+FirePHPCore-0.3.1
+dir
+
+dbdMVC.php
+file
+
+
+
+
+2010-01-29T17:28:41.000000Z
+e6a6f57f2f983a64b4bf20d8fc37b7db
+2010-01-29T01:51:02.645835Z
+1776
+wmason
+
+lib
+dir
+
+help
+dir
+
+Smarty-2.6.18
+dir
+
+xajax_0.2.5
+dir
+
+makeApp
+file
+
+
+
+
+2009-05-07T22:19:03.000000Z
+4ca42ab698e7aeec0e9480f0e5a247d2
+2008-11-18T00:03:55.449552Z
+354
+root
+has-props
+

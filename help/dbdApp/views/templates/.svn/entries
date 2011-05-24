@@ -1,0 +1,85 @@
+8
+
+dir
+1803
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo/dbdMVC/trunk/help/dbdApp/views/templates
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo
+
+
+
+2010-02-07T03:38:06.605642Z
+1803
+wmason
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+78647451-d9dc-4e60-9644-f91bfbd15ed2
+
+global
+dir
+
+index.tpl
+file
+
+
+
+
+2010-02-07T03:39:13.000000Z
+7ec06f4c12261b1341c8eb9646003c85
+2010-02-07T03:38:06.605642Z
+1803
+wmason
+
+error.tpl
+file
+
+
+
+
+2010-02-07T03:39:13.000000Z
+cb7a5eb4114288a0c15422f05023a632
+2010-02-07T03:38:06.605642Z
+1803
+wmason
+
+emails
+dir
+
+emailHTML.tpl
+file
+
+
+
+
+2010-02-07T03:39:13.000000Z
+e628564c30f4391e03a26ff6030a0218
+2010-02-07T03:38:06.605642Z
+1803
+wmason
+
+emailTEXT.tpl
+file
+
+
+
+
+2010-02-07T03:39:13.000000Z
+cc3834ec160e6aa103a0b1f14a12bac6
+2010-02-07T03:38:06.605642Z
+1803
+wmason
+
+com
+dir
+

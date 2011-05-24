@@ -1,0 +1,67 @@
+8
+
+dir
+1803
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo/dbdMVC/trunk/FirePHPCore-0.3.1
+svn+ssh://dbdmvc@dbdmvc.com/usr/local/svn/repo
+
+
+
+2009-07-07T23:03:54.275763Z
+1304
+root
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+78647451-d9dc-4e60-9644-f91bfbd15ed2
+
+lib
+dir
+
+CHANGELOG
+file
+
+
+
+
+2009-09-10T21:47:38.000000Z
+b1b2ac79fd4937327f43d0c75df147b5
+2009-07-07T23:03:54.275763Z
+1304
+root
+
+CREDITS
+file
+
+
+
+
+2009-09-10T21:47:38.000000Z
+4920ccd232ffa02846993d2dfb76c71f
+2009-07-07T23:03:54.275763Z
+1304
+root
+
+README
+file
+
+
+
+
+2009-09-10T21:47:38.000000Z
+22abef5fb3d965663d192ef528d5a754
+2009-07-07T23:03:54.275763Z
+1304
+root
+
