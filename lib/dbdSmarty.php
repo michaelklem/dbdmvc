@@ -356,6 +356,7 @@ class dbdSmarty extends Smarty
 	 */
 	public function dbdIncludeFiles($tpl, $smarty)
 	{
+/*
 		if (count($this->css_files) > 0)
 		{
 			$href = dbdCSS::genURL($this->css_files, $this->css_vars);
@@ -367,6 +368,7 @@ class dbdSmarty extends Smarty
 			else
 				$tpl = preg_replace("/(<\/head>)/", $tag."\n\\1", $tpl, 1);
 		}
+*/
 		if (count($this->js_files) > 0)
 		{
 			$int = array();
