@@ -159,6 +159,13 @@ class dbdMVC
 	 */
 	private $debug_mode = 0;
 	/**
+	 * Current debug minify mode.
+	 * 0 = no minify
+	 * 1 = minify
+	 * @var integer
+	 */
+	private $minify_mode = 0;
+	/**
 	 * Name of dbdApp
 	 * @var string
 	 */
@@ -330,6 +337,14 @@ class dbdMVC
 		self::getInstance()->debug_mode = $mode;
 	}
 	/**
+	 * Set debug minify mode.
+	 * @param integer $mode
+	 */
+	public static function setDebugMinifyMode($mode)
+	{
+		self::getInstance()->minify_mode = $mode;
+	}
+	/**
 	 * Get the active instance of dbdMVC or create one.
 	 * @return object instance of dbdMVC
 	 */
@@ -466,6 +481,14 @@ class dbdMVC
 	public static function debugMode($mode)
 	{
 		return (self::getInstance()->debug_mode & $mode) === $mode ? true : false;
+	}
+	/**
+	 * Check if debug minify mode is set.
+	 * @return boolean
+	 */
+	public static function debugMinifyMode()
+	{
+		return self::getInstance()->minify_mode;
 	}
 	/**
 	 * Allow phpinfo() display via dbdInfo.

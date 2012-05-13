@@ -149,7 +149,7 @@ abstract class dbdModel
 		$sql = "delete from `".$this->table_name."` where `".$this->table_key."` = ?";
 		self::$db->prepExec($sql, array($this->id));
 		$this->id = 0;
-		$this->init();
+//		$this->init();		// why would we want this?
 	}
 	/**
 	 * Get a count of all rows from this table
