@@ -166,6 +166,18 @@ abstract class dbdModel
 		return self::$db->prepExec($sql, $table_keys)->fetchColumn();
 	}
 	/**
+	 * Get a count of all rows from this table
+	 * @param string $class
+	 * @param array $table_keys
+	 * @return array dbdModel
+	 */
+	public static function getCountBySQL($class, $sql)
+	{
+		self::ensureDB();
+		$tmp = array();
+		return self::$db->prepExec($sql, $table_keys)->fetchColumn();
+	}
+	/**
 	 * Get all rows from this table
 	 * @param string $order
 	 * @param string $limit
@@ -183,7 +195,25 @@ abstract class dbdModel
 		if ($limit !== null)
 			$sql .= " limit ".$limit;
 		foreach (self::$db->prepExec($sql, $table_keys)->fetchAll(PDO::FETCH_COLUMN, 0) as $id)
+		{
 			$tmp[] = $ids_only ? $id : self::getReflection($class)->newInstance($id);
+		}
+		return $tmp;
+	}
+	/**
+	 * Get all rows from this table using the passed sql statement
+	 * @param string $sql
+	 * @param boolean $ids_only
+	 * @return array dbdModel
+	 */
+	public static function getAllBySQL($class, $sql, $ids_only = false)
+	{
+		self::ensureDB();
+		$tmp = array();
+		foreach (self::$db->prepExec($sql)->fetchAll(PDO::FETCH_COLUMN, 0) as $id)
+		{
+			$tmp[] = $ids_only ? $id : self::getReflection($class)->newInstance($id);
+		}
 		return $tmp;
 	}
 	/**
@@ -200,7 +230,9 @@ abstract class dbdModel
 			$sql .= " ".($i++ > 0 ? "and" : "where")." ";
 			$type = dbdDB::COMP_EQ;
 			if (!is_array($v))
+			{
 				$v = array($v);
+			}
 			if (key_exists(dbdDB::COMP_TYPE, $v))
 			{
 				$type = $v[dbdDB::COMP_TYPE];
@@ -252,6 +284,10 @@ abstract class dbdModel
 					break;
 				case dbdDB::COMP_NEQ:
 					$sql .= "`".$k."` != :".$k;
+					$table_keys[$k] = $v[0];
+					break;
+				case dbdDB::COMP_ISNOT:
+					$sql .= "`".$k."` is not :".$k;
 					$table_keys[$k] = $v[0];
 					break;
 				case dbdDB::COMP_NULLEQ:
