@@ -64,6 +64,20 @@ class InputCSS
 	{
 		return "InputCSS-".self::getCallingFile()."-".md5(microtime(true))."-".self::$div_id++;
 	}
+	
+	
+	private static function getXHTML($type, $id, $name, $value, $disabled, $checked = false, $extra = "", $text, $color)
+	{
+	  if(isset($text)) 
+	  {
+	     return self::getTextXHTML($type, $id, $name, $value, $disabled, $checked = false, $extra = "", $text, $color);
+	  }  
+	  else {
+	     return self::getImageXHTML($type, $id, $name, $value, $disabled, $checked = false, $extra = "");
+	  }
+	}
+	
+	
 	/**
 	 * Generate all markup required for final output.
 	 * @static
@@ -76,7 +90,67 @@ class InputCSS
 	 * @param string $extra
 	 * @return string
 	 */
-	private static function getXHTML($type, $id, $name, $value, $disabled, $checked = false, $extra = "")
+	private static function getTextXHTML($type, $id, $name, $value, $disabled, $checked = false, $extra = "", $text, $color)
+	{
+		$div_id = self::getDivID();
+		$input_id = self::getInputID($id);
+
+		$html = "<div class=\"hiddenButtonDiv ".$id."Div\">";
+		$html .= "<input type=\"".$type."\" id=\"".$input_id."\" name=\"".$name."\" value=\"".$value."\" class=\"hiddenButton".($disabled ? "Disabled" : "")."\"";
+		if (!$disabled)
+		{
+			//if (!in_array($type, array("checkbox", "radio", "submit", "reset")))
+			//{
+			//	$html .= " onmouseover=\"$('#".$div_id."').removeClass().addClass('".$id."On');\"";
+			//	$html .= " onmouseout=\"$('#".$div_id."').removeClass().addClass('".$id."Off');\"";
+			//}
+		}
+		else
+		{
+			$html .= " disabled=\"disabled\"";
+		}
+		if ($checked)
+			$html .= " checked=\"checked\"";
+		if (!empty($extra))
+			$html .= " ".$extra;
+		$html .= " />";
+		if (in_array($type, array("checkbox", "radio")))
+		{
+			$html .= "<a href=\"#\" onclick=\"if (!$('#".$input_id."').attr('checked')){";
+			if ($type == "radio")
+				$html .= "$('input[name=".$name."]:checked').siblings('div').each(function (i){var old = $(this).attr('class');$(this).removeClass().addClass(old.replace('On', 'Off'));});";
+			$html .= "$('#".$div_id."').removeClass().addClass('".$id."On');$('#".$input_id."').attr('checked', true);";
+			$html .= "}else{";
+			if ($type == "checkbox")
+				$html .= "$('#".$div_id."').removeClass().addClass('".$id."Off'); $('#".$input_id."').attr('checked', false);";
+			$html .= "} return false;\"";
+			$html .= ">".$value."</a>";
+		}
+		elseif (in_array($type, array("submit", "reset")))
+		{
+			$html .= "<a href=\"#\" ".($disabled ? "class=\"disabled\"" : "")."onclick=\"$('#".$input_id."').click(); return false;\"";
+			$html .= " title=\"".$value."\">".$value."</a>";
+		}
+		// The class of the button will need to be set in a variable. We also need to implement a disabled style.
+		$html .= "<button id=\"".$div_id."\" class=\"".$color."-btn ".$id.($disabled ? " disabled" : "")."\"><span>".$text."</span></button>";
+		$html .= "</div>\n";
+		return $html;
+	}
+	
+	
+		/**
+	 * Generate all markup required for final output.
+	 * @static
+	 * @access private
+	 * @param string $type
+	 * @param string $id
+	 * @param string $name
+	 * @param string $value
+	 * @param bool $disabled
+	 * @param string $extra
+	 * @return string
+	 */
+	private static function getImageXHTML($type, $id, $name, $value, $disabled, $checked = false, $extra = "")
 	{
 		$div_id = self::getDivID();
 		$input_id = self::getInputID($id);
@@ -124,6 +198,8 @@ class InputCSS
 		$html .= "</div>\n";
 		return $html;
 	}
+	
+	
 	/**
 	 * Generate a submit button.
 	 * @static
@@ -134,9 +210,9 @@ class InputCSS
 	 * @param string $extra
 	 * @return string
 	 */
-	public static function button($id, $name, $value, $disabled = false, $extra = "")
+	public static function button($id, $name, $value, $disabled = false, $extra = "", $text, $color)
 	{
-		return self::getXHTML("submit", $id, $name, $value, $disabled, false, $extra);
+		return self::getXHTML("submit", $id, $name, $value, $disabled, false, $extra, $text, $color);
 	}
 	/**
 	 * Generate a reset button.
@@ -162,9 +238,9 @@ class InputCSS
 	 * @param string $extra
 	 * @return string
 	 */
-	public static function file($id, $name, $disabled = false, $extra = "")
+	public static function file($id, $name, $disabled = false, $extra = "", $text, $color)
 	{
-		return self::getXHTML("file", $id, $name, "", $disabled, false, $extra);
+		return self::getXHTML("file", $id, $name, "", $disabled, false, $extra, $text, $color);
 	}
 	/**
 	 * Generate a checkbox input.

@@ -47,13 +47,13 @@ function smarty_function_inputcss($params, &$smarty)
 	{
 		case 'submit':
 		case 'button':
-			return InputCSS::button($params['id'], $params['name'], $params['value'], $params['disabled'], $params['extra']);
+			return InputCSS::button($params['id'], $params['name'], $params['value'], $params['disabled'], $params['extra'], $params['text'], $params['color']);
 		case 'reset':
 			return InputCSS::reset($params['id'], $params['name'], $params['value'], $params['disabled'], $params['extra']);
 		case 'text':
 			return InputCSS::text($params['id'], $params['name'], $params['disabled'], $params['extra']);
 		case 'file':
-			return InputCSS::file($params['id'], $params['name'], $params['disabled'], $params['extra']);
+			return InputCSS::file($params['id'], $params['name'], $params['disabled'], $params['extra'], $params['text'], $params['color']);
 		case 'checkbox':
 			return InputCSS::checkbox($params['id'], $params['name'], $params['value'], $params['disabled'], $params['checked'], $params['extra']);
 		case 'radio':
