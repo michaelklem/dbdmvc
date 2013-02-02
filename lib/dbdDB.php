@@ -44,6 +44,7 @@ class dbdDB
 	const COMP_NLIKE = 11;
 	const COMP_BETWEEN = 12;
 	const COMP_NBETWEEN = 13;
+	const COMP_ISNOT = 14;
 	/**
 	 * array of dbdDB objects
 	 * to be filled by the static

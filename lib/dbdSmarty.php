@@ -77,6 +77,11 @@ class dbdSmarty extends Smarty
 	 */
 	private $debug = false;
 	/**
+	 * Flag to turn off minification in debug mode.
+	 * @var boolean
+	 */
+	private $debug_minify = false;
+	/**
 	 * Css host name if not DOCROOT directory
 	 * @var string
 	 */
@@ -124,6 +129,7 @@ class dbdSmarty extends Smarty
 		parent::Smarty();
 		$this->app_dir = $app_dir;
 		$this->debug = dbdMVC::debugMode(DBD_DEBUG_HTML);
+		$this->debug_minify = dbdMVC::debugMinifyMode();
 		$this->setOptions();
 	}
 	/**
@@ -145,7 +151,7 @@ class dbdSmarty extends Smarty
 		$this->plugins_dir[] = DBD_SMARTY_PLUG_DIR;
 
 		$this->register_outputfilter(array($this, "dbdIncludeFiles"));
-		if (!$this->debug)
+		if (!$this->debug || $this->debug_minify)
 		{
 			$this->register_outputfilter(array($this, "dbdMinify"));
 //			$this->register_outputfilter(array($this, "dbdBeautify"));
@@ -356,8 +362,10 @@ class dbdSmarty extends Smarty
 	 */
 	public function dbdIncludeFiles($tpl, $smarty)
 	{
-		if (count($this->css_files) > 0)
+		$css_debug = $this->debug_minify ? $this->debug_minify : dbdMVC::debugMode(DBD_DEBUG_CSS);
+		if ($css_debug && count($this->css_files) > 0)
 		{
+		dbdLog("compiling  css");
 			$href = dbdCSS::genURL($this->css_files, $this->css_vars);
 			if ($this->css_host !== null)
 				$href = "http://".$this->css_host.$href;
@@ -367,8 +375,11 @@ class dbdSmarty extends Smarty
 			else
 				$tpl = preg_replace("/(<\/head>)/", $tag."\n\\1", $tpl, 1);
 		}
-		if (count($this->js_files) > 0)
+
+		$js_debug = $this->debug_minify ? $this->debug_minify : dbdMVC::debugMode(DBD_DEBUG_JS);
+		if ($js_debug && count($this->js_files) > 0)
 		{
+		dbdLog("compiling  js");
 			$int = array();
 			$ext = array();
 			foreach ($this->js_files as $j)
