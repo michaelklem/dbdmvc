@@ -175,7 +175,7 @@ abstract class dbdModel
 	{
 		self::ensureDB();
 		$tmp = array();
-		return self::$db->prepExec($sql, $table_keys)->fetchColumn();
+		return self::$db->prepExec($sql)->fetchColumn();
 	}
 	/**
 	 * Get all rows from this table
