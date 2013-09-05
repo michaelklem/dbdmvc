@@ -224,17 +224,46 @@ class dbdLoader
 			}
 			catch (dbdException $e)
 			{
-				throw $e;
+//				throw $e;
 			}
 		}
 	}
 	/**#@-*/
 }
+
+if(function_exists('spl_autoload_register')) {
+	/* Use the spl_autoload_register function if it is available. It should be available
+	 * for PHP versions >= 5.1.2.
+	 */
+	spl_autoload_register('dbd_autoload');
+} else {
+
+	/* spl_autoload_register is unavailable - let us hope that no one else uses the __autoload function. */
+
+	/**
+	 * Autoload function for those who don't have spl_autoload_register.
+	 *
+	 * @param $className  The name of the requested class.
+	 */
+
+	function __autoload($class)
+	{
+		dbdLoader::loadClass($class);
+	}
+
+}	
 /**
  * Autoload classes using dbdLoader::loadClass();
  * @param string $class
  */
+/*
 function __autoload($class)
+{
+	dbdLoader::loadClass($class);
+}
+*/
+
+function dbd_autoload($class)
 {
 	dbdLoader::loadClass($class);
 }
