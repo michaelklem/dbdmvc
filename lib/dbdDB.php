@@ -63,6 +63,8 @@ class dbdDB
 	 */
 	private $options = array(
 		PDO::ATTR_CASE => PDO::CASE_LOWER,
+PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+PDO::MYSQL_ATTR_INIT_COMMAND => "SET CHARACTER SET utf8",
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 	);
 	/**
@@ -167,6 +169,7 @@ class dbdDB
 	 */
 	public function prepExec($statement, $input_parameters = array(), $driver_options = array())
 	{
+		$this->exec("SET NAMES utf8");
 		$sth = $this->prepare($statement, $driver_options);
 		if (!$sth->execute($input_parameters))
 			throw new dbdException("Statement could not be executed!");
