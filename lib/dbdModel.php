@@ -36,6 +36,13 @@ abstract class dbdModel
 {
 	const CONST_TABLE_NAME = 'TABLE_NAME';
 	const CONST_TABLE_KEY = 'TABLE_KEY';
+
+	// Memcache constants
+	const MEMCACHED_HOST = '127.0.0.1';
+	const MEMCACHED_PORT = 11211;
+
+	protected static $memcache = null;//new Memcache();
+	
 	/**
 	 * A list of class reflections to limit overhead
 	 * @var array ReflectionClass
@@ -78,6 +85,15 @@ abstract class dbdModel
 		$this->table_key = self::getConstant($class, self::CONST_TABLE_KEY);
 		self::ensureDB();
 		$this->id = $id;
+		
+		
+		if (self::$memcache == null)
+		{
+			self::$memcache = memcache_connect(self::MEMCACHED_HOST, self::MEMCACHED_PORT);
+			dbdLog("INITIALIZED MEMCACHE");
+			//self::$memcache->flush();
+		}
+		
 		if ($this->id > 0)
 			$this->init();
 		else
@@ -88,8 +104,37 @@ abstract class dbdModel
 	 */
 	protected function init()
 	{
-		$sql = "select * from `".$this->table_name."` where `".$this->table_key."` = ?";
-		$this->data = self::$db->prepExec($sql, array($this->id))->fetch(PDO::FETCH_ASSOC);
+		$cache_data = null;
+		if (self::$memcache && $this->allowed_for_caching())
+		{
+			$key = $this->table_name."_".$this->id;
+			$cache_data = self::$memcache->get($key);
+			if ($cache_data != null)
+			{
+				$this->data = $cache_data['data'];
+				dbdLog("WWW Using Cached result for ".$key);
+			}
+			else
+			{
+				dbdLog("WWW Missed Cached result for ".$key);
+			}
+		}
+
+		if ($cache_data['data'] == null)
+		{
+			$sql = "select * from `".$this->table_name."` where `".$this->table_key."` = ?";
+			dbdLog("*** DBDMODEL init ".$sql);
+			$this->data = self::$db->prepExec($sql, array($this->id))->fetch(PDO::FETCH_ASSOC);
+		
+			// store in cache
+			if (self::$memcache && $this->allowed_for_caching())
+			{
+				$key = $this->table_name."_".$this->id;
+				$cache_data = array('id' => $this->id,  'data' => $this->data);
+				self::$memcache->set($key, $cache_data);
+				dbdLog("WWW Caching result for ".$key);
+			}
+		}
 	}
 	/**
 	 * Select all the fields names for this table
@@ -136,7 +181,19 @@ abstract class dbdModel
 			$sql .= "`".$k."` = :".$k;
 		}
 		$sql .= $sql_end;
+		dbdLog("*** DBDMODEL SQL ".$sql);
 		self::$db->prepExec($sql, array_merge(array($this->table_key => $this->id), $this->data));
+
+		// remove cached data 
+		if (self::$memcache && $this->allowed_for_caching())
+		{
+			$key = $this->table_name."_".$this->id;
+			self::$memcache->delete($key);
+			$cache_data = array('id' => $this->id,  'data' => $this->data);
+			self::$memcache->set($key, $cache_data);
+			dbdLog("WWW REFRESHED CACHE ".$key);
+		}
+		
 		if ($this->id == 0)
 			$this->id = self::$db->lastInsertId($this->table_name);
 		$this->init();
@@ -149,7 +206,6 @@ abstract class dbdModel
 		$sql = "delete from `".$this->table_name."` where `".$this->table_key."` = ?";
 		self::$db->prepExec($sql, array($this->id));
 		$this->id = 0;
-//		$this->init();		// why would we want this?
 	}
 	/**
 	 * Get a count of all rows from this table
@@ -163,6 +219,7 @@ abstract class dbdModel
 		$tmp = array();
 		$sql = "select count(1) from `".self::getConstant($class, self::CONST_TABLE_NAME)."`";
 		$sql .= self::buildWhereClause($table_keys);
+		dbdLog("*** DBDMODEL SQL ".$sql);
 		return self::$db->prepExec($sql, $table_keys)->fetchColumn();
 	}
 	/**
@@ -175,6 +232,7 @@ abstract class dbdModel
 	{
 		self::ensureDB();
 		$tmp = array();
+		dbdLog("*** DBDMODEL SQL ".$sql);
 		return self::$db->prepExec($sql)->fetchColumn();
 	}
 	/**
@@ -194,6 +252,7 @@ abstract class dbdModel
 			$sql .= " order by ".$order;
 		if ($limit !== null)
 			$sql .= " limit ".$limit;
+		dbdLog("*** DBDMODEL getAll ".$sql);
 		foreach (self::$db->prepExec($sql, $table_keys)->fetchAll(PDO::FETCH_COLUMN, 0) as $id)
 		{
 			$tmp[] = $ids_only ? $id : self::getReflection($class)->newInstance($id);
@@ -210,6 +269,7 @@ abstract class dbdModel
 	{
 		self::ensureDB();
 		$tmp = array();
+		dbdLog("*** DBDMODEL getAllBySQL ".$sql);
 		foreach (self::$db->prepExec($sql)->fetchAll(PDO::FETCH_COLUMN, 0) as $id)
 		{
 			$tmp[] = $ids_only ? $id : self::getReflection($class)->newInstance($id);
@@ -428,6 +488,21 @@ abstract class dbdModel
 			}
 		}
 		throw new dbdException(get_class().": Method ('".$name."') not found!");
+	}
+
+	private function allowed_for_caching()
+	{
+		$allowed = false;
+		if ($this->table_name == 'users'
+			|| $this->table_name == 'schools'
+			|| $this->table_name == 'galleries'
+			|| $this->table_name == 'gallery_images'
+			)
+		{
+			$allowed = true;
+		}
+		
+		return $allowed;
 	}
 }
 ?>
