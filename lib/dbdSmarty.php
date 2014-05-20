@@ -46,10 +46,10 @@ class dbdSmarty extends Smarty
 	 * @var array
 	 */
 	private $minify_regex = array(
-		"spaces" => array("/ [ ]+/", " "),
 		"printable_tabs" => array("%(?<=[^<>])\t(?=[^<>]*</(textarea|code|pre)>)%i", "&#09;"),
 		"printable_newlines" => array("%(?<=[^<>])\r?\n(?=[^<>]*</(textarea|code|pre)>)%i", "&#10;"),
 		"printable_whitespace" => array("/(?<=[^<>])(\n|\t)+(?=[^<>])/", " "),
+		"spaces" => array("/ [ ]+/", " "),
 		"whitespace" => array("/(\n|\t)+/", ""),
 		"comments" => array("/<!--.*?-->/", "")
 	);
@@ -153,8 +153,10 @@ class dbdSmarty extends Smarty
 		$this->register_outputfilter(array($this, "dbdIncludeFiles"));
 		if (!$this->debug || $this->debug_minify)
 		{
-			$this->register_outputfilter(array($this, "dbdMinify"));
-//			$this->register_outputfilter(array($this, "dbdBeautify"));
+			// commented out minification as this messes up
+			// the formatting used in text areas.
+			// not a big win any way as we already compressed CSS and JS
+//			$this->register_outputfilter(array($this, "dbdMinify"));
 		}
 		$this->register_outputfilter(array($this, "dbdTag"));
 //		$this->register_resource('string', array(
@@ -438,6 +440,24 @@ class dbdSmarty extends Smarty
 			$tpl = preg_replace($v[0], $v[1], $tpl);
 		return trim($tpl);
 	}
+
+
+public function protect_characters($array){
+    $safe=$array[0];
+    $safe=preg_replace('/\\n/', "%%newline%%", $safe);
+    $safe=preg_replace('/\\t/', "%%tab%%", $safe);
+    $safe=preg_replace('/\\s/', "%%space%%", $safe);
+    return $safe;
+}
+
+public function unprotect_characters($array){
+    $safe=$array[0];
+    $safe=preg_replace('/%%newline%%/', "&#13;", $safe);
+    $safe=preg_replace('/%%tab%%/', "&#09;", $safe);
+    $safe=preg_replace('/%%space%%/', "&#32;", $safe);
+    return $safe;
+}
+
 	/**
 	 * Minify buffer.
 	 * @param string $tpl
@@ -446,8 +466,13 @@ class dbdSmarty extends Smarty
 	 */
 	public function dbdMinify($tpl, $smarty)
 	{
+		$tpl = preg_replace_callback("/>[^<]*<\\/textarea/i", array($this, protect_characters), $tpl);
 		foreach ($this->minify_regex as $k => $v)
+		{
 			$tpl = preg_replace($v[0], $v[1], $tpl);
+		}
+		$tpl = preg_replace_callback("/>[^<]*<\\/textarea/i", array($this, unprotect_characters), $tpl);
+
 		return trim($tpl);
 	}
 	/**
