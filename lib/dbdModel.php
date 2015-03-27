@@ -36,6 +36,13 @@ abstract class dbdModel
 {
 	const CONST_TABLE_NAME = 'TABLE_NAME';
 	const CONST_TABLE_KEY = 'TABLE_KEY';
+
+	// Memcache constants
+	const MEMCACHED_HOST = '127.0.0.1';
+	const MEMCACHED_PORT = 11211;
+
+	protected static $memcache = null;//new Memcache();
+	
 	/**
 	 * A list of class reflections to limit overhead
 	 * @var array ReflectionClass
@@ -86,11 +93,46 @@ abstract class dbdModel
 	/**
 	 * Select all the fields for this row
 	 */
-	protected function init()
+	protected function init_old()
 	{
 		$sql = "select * from `".$this->table_name."` where `".$this->table_key."` = ?";
 		$this->data = self::$db->prepExec($sql, array($this->id))->fetch(PDO::FETCH_ASSOC);
 	}
+
+	protected function init()
+	{
+		$cache_data = null;
+		if ($this->allowed_for_caching())
+		{
+			$key = $this->table_name."_".$this->id;
+			$cache_data = $this->get_cache()->get($key);
+			if ($cache_data != null)
+			{
+				$this->data = $cache_data['data'];
+				//dbdLog("WWW Using Cached result for ".$key);
+			}
+			else
+			{
+				//dbdLog("WWW Missed Cached result for ".$key);
+			}
+		}
+
+		if ($cache_data['data'] == null)
+		{
+			$sql = "select * from `".$this->table_name."` where `".$this->table_key."` = ?";
+			//dbdLog("*** DBDMODEL init ".$sql);
+			$this->data = self::$db->prepExec($sql, array($this->id))->fetch(PDO::FETCH_ASSOC);
+		
+			// store in cache
+			if ($this->allowed_for_caching())
+			{
+				$key = $this->table_name."_".$this->id;
+				$cache_data = array('id' => $this->id,  'data' => $this->data);
+				$this->get_cache()->set($key, $cache_data, MEMCACHE_COMPRESSED, 2);
+				dbdLog("WWW Caching result for ".$key);
+			}
+		}
+	}	
 	/**
 	 * Select all the fields names for this table
 	 */
@@ -111,11 +153,10 @@ abstract class dbdModel
 	{
 		foreach ($fields as $k => $v)
 		{
-//			if (!key_exists($k, $this->data))
-//				throw new dbdException(get_class().": Field ('".$k."') not valid!");
-//			$this->__set($k, $v);
 			if (key_exists($k, $this->data))
+			{
 				$this->__set($k, $v);
+			}
 		}
 		$sql = "";
 		$sql_end = "";
@@ -137,6 +178,17 @@ abstract class dbdModel
 		}
 		$sql .= $sql_end;
 		self::$db->prepExec($sql, array_merge(array($this->table_key => $this->id), $this->data));
+
+		// remove cached data 
+		if ($this->allowed_for_caching())
+		{
+			$key = $this->table_name."_".$this->id;
+			$this->get_cache()->delete($key);
+			$cache_data = array('id' => $this->id,  'data' => $this->data);
+			$this->get_cache()->set($key, $cache_data);
+			dbdLog("WWW REFRESHED CACHE ".$key);
+		}
+		
 		if ($this->id == 0)
 			$this->id = self::$db->lastInsertId($this->table_name);
 		$this->init();
@@ -149,7 +201,6 @@ abstract class dbdModel
 		$sql = "delete from `".$this->table_name."` where `".$this->table_key."` = ?";
 		self::$db->prepExec($sql, array($this->id));
 		$this->id = 0;
-//		$this->init();		// why would we want this?
 	}
 	/**
 	 * Get a count of all rows from this table
@@ -428,6 +479,33 @@ abstract class dbdModel
 			}
 		}
 		throw new dbdException(get_class().": Method ('".$name."') not found!");
+	}
+
+	private function allowed_for_caching()
+	{
+		$allowed = false;
+		if ($this->table_name == 'users'
+			|| $this->table_name == 'schools'
+/*
+			|| $this->table_name == 'galleries'
+			|| $this->table_name == 'gallery_images'
+*/
+			)
+		{
+			$allowed = true;
+		}
+		
+		return $allowed;
+	}
+
+	private function get_cache()
+	{		
+		if (self::$memcache == null)
+		{
+			self::$memcache = memcache_connect(self::MEMCACHED_HOST, self::MEMCACHED_PORT);
+			//self::$memcache->flush();
+		}
+		return self::$memcache;
 	}
 }
 ?>
