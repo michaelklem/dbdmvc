@@ -43,6 +43,8 @@ abstract class dbdModel
 
 	protected static $memcache = null;//new Memcache();
 	
+	private $enable_caching = true;
+	
 	/**
 	 * A list of class reflections to limit overhead
 	 * @var array ReflectionClass
@@ -102,7 +104,7 @@ abstract class dbdModel
 	protected function init()
 	{
 		$cache_data = null;
-		if ($this->allowed_for_caching())
+		if ($this->allowed_for_caching() && $this->enable_caching)
 		{
 			$key = $this->table_name."_".$this->id;
 			$cache_data = $this->get_cache()->get($key);
@@ -129,10 +131,21 @@ abstract class dbdModel
 				$key = $this->table_name."_".$this->id;
 				$cache_data = array('id' => $this->id,  'data' => $this->data);
 				$this->get_cache()->set($key, $cache_data, MEMCACHE_COMPRESSED, 2);
-				dbdLog("WWW Caching result for ".$key);
+				//dbdLog("WWW Caching result for ".$key);
 			}
 		}
 	}	
+	
+	public function disableCaching()
+	{
+		$this->enable_caching = false;
+	}
+	
+	public function enableCaching()
+	{
+		$this->enable_caching = true;
+	}
+	
 	/**
 	 * Select all the fields names for this table
 	 */
@@ -177,6 +190,10 @@ abstract class dbdModel
 			$sql .= "`".$k."` = :".$k;
 		}
 		$sql .= $sql_end;
+//dbdLog('SQL: '.$sql);
+foreach($this->data as $key => $value){
+//  dbdLog('data: key: '.$key.' = '.$value);
+}
 		self::$db->prepExec($sql, array_merge(array($this->table_key => $this->id), $this->data));
 
 		// remove cached data 
@@ -186,7 +203,7 @@ abstract class dbdModel
 			$this->get_cache()->delete($key);
 			$cache_data = array('id' => $this->id,  'data' => $this->data);
 			$this->get_cache()->set($key, $cache_data);
-			dbdLog("WWW REFRESHED CACHE ".$key);
+			//dbdLog("WWW REFRESHED CACHE ".$key);
 		}
 		
 		if ($this->id == 0)
@@ -199,6 +216,7 @@ abstract class dbdModel
 	public function delete()
 	{
 		$sql = "delete from `".$this->table_name."` where `".$this->table_key."` = ?";
+		dbdLog('delete sql: '.$sql);
 		self::$db->prepExec($sql, array($this->id));
 		$this->id = 0;
 	}
@@ -501,9 +519,10 @@ abstract class dbdModel
 	private function get_cache()
 	{		
 		if (self::$memcache == null)
+                //if (true)
 		{
 			self::$memcache = memcache_connect(self::MEMCACHED_HOST, self::MEMCACHED_PORT);
-			//self::$memcache->flush();
+			self::$memcache->flush();
 		}
 		return self::$memcache;
 	}

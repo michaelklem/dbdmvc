@@ -292,6 +292,8 @@ class dbdSmarty extends Smarty
 	 */
 	public function initFlash()
 	{
+		/*
+		dbdLog('initFlash xxx');
 		if (class_exists("FlashLoaderSWFO", 1))
 		{
 			if (!$this->flash_loader instanceof FlashLoaderSWFO)
@@ -306,6 +308,7 @@ class dbdSmarty extends Smarty
 		{
 			throw new dbdException("FlashLoaderSWFO could not be found!");
 		}
+		*/
 	}
 	/**
 	 * Add a flash movie to FlashLoader
@@ -313,9 +316,12 @@ class dbdSmarty extends Smarty
 	 */
 	public function addFlashMovie()
 	{
+		/*
+		dbdLog('addFLash xxx');
 		$this->initFlash();
 		$a = func_get_args();
 		call_user_func_array(array($this->flash_loader, 'addMovie'), $a);
+		*/
 	}
 	/**
 	 * Initialize QTLoader
